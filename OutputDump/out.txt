@@ -1,0 +1,3 @@
+../media/aj.jpeg: Predicted in 4.587045 seconds.
+tvmonitor: 71%
+laptop: 52%
