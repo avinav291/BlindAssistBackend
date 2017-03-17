@@ -10,16 +10,31 @@ import grequests
 import time
 
 @csrf_exempt
-def uploadImages(request):
-    async_list = []
-
+def uploadImage(request):
     name = request.POST.get('name')
-
     url = 'https://api.kairos.com/enroll'
     headers = {'Content-Type': 'application/json', 'app_id': '9577a7cf',
                'app_key': 'bb4b12aca6697ff8db9daebc9c7a2967'}  # TODO Change Keys
+    myfile = request.FILES.get('image')
+    fs = FileSystemStorage()
+    filename = fs.save("media/" + myfile.name, myfile)
+    with open(filename, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+        payload = {"image": encoded_string, "gallery_name": "Gallery1", "subject_id": name} #TODO Change gallery name
+        requests.post(url, data=json.dumps(payload), headers=headers)
+    return HttpResponse(json.dumps({'statusCode': 200, 'message': 'Success'}))
 
+@csrf_exempt
+def ping(request):
+    return HttpResponse(json.dumps({'statusCode': 200, 'message': 'Success'}))
 
+@csrf_exempt
+def uploadImages(request):
+    async_list = []
+    name = request.POST.get('name')
+    url = 'https://api.kairos.com/enroll'
+    headers = {'Content-Type': 'application/json', 'app_id': '9577a7cf',
+               'app_key': 'bb4b12aca6697ff8db9daebc9c7a2967'}  # TODO Change Keys
     # start = time.time()
     for i in range(1, 7):
         # print request
