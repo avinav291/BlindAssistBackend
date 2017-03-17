@@ -1,0 +1,3 @@
+../media/aj_GB1XV9r.jpeg: Predicted in 4.048995 seconds.
+tvmonitor: 71%
+laptop: 52%
