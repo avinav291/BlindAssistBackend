@@ -1,3 +1,10 @@
-../media/aj.jpeg: Predicted in 4.587045 seconds.
-tvmonitor: 71%
-laptop: 52%
+../media/aj_REcDSqL.jpeg: Predicted in 3.911799 seconds.
+person: 31%
+person: 38%
+person: 44%
+person: 42%
+person: 42%
+person: 63%
+chair: 53%
+laptop: 86%
+laptop: 25%

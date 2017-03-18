@@ -6,7 +6,41 @@ import os
 import json
 import requests
 import base64
-from sets import Set
+import grequests
+import time
+
+@csrf_exempt
+def uploadImages(request):
+    async_list = []
+
+    name = request.POST.get('name')
+
+    url = 'https://api.kairos.com/enroll'
+    headers = {'Content-Type': 'application/json', 'app_id': '9577a7cf',
+               'app_key': 'bb4b12aca6697ff8db9daebc9c7a2967'}  # TODO Change Keys
+
+
+    # start = time.time()
+    for i in range(1, 7):
+        # print request
+        if request.FILES.has_key('image'+str(i)):
+            myfile = request.FILES.get('image'+ str(i))
+            print myfile
+            fs = FileSystemStorage()
+            filename = fs.save("media/"+ myfile.name, myfile)
+            with open(filename, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+                payload = {"image": encoded_string, "gallery_name": "Gallery1", "subject_id": name}
+                action_item = grequests.post(url, data=json.dumps(payload), headers=headers)
+                async_list.append(action_item)
+    # end = time.time()
+    # print end-start
+    start = time.time()
+    grequests.map(async_list)
+    end = time.time()
+    print end-start
+    return HttpResponse("success")
+
 
 @csrf_exempt
 def getImageCaption(request):
@@ -16,8 +50,10 @@ def getImageCaption(request):
     captionDict = sendResponseFromImage(filename)
     if captionDict.has_key('person'):
         person_response = sendImage(filename)
-        if person_response.status_code is 200:
-            candidates = person_response.text['images']['candidates']
+        person_response_dict = json.loads(person_response.text)
+        print person_response_dict
+        if 'candidates' in person_response.text:
+            candidates = person_response_dict['images'][0]['candidates']
             for candidate in candidates:
                 captionDict[candidate['subject_id']] = 100
             del captionDict['person']
@@ -36,7 +72,7 @@ def getImageCaption(request):
     #                 captions.append({'caption': person, 'confidenceScore': 100})
     #     del captions[c]
 
-
+    print captions
     return HttpResponse(json.dumps(captions), content_type='application/json')
 
 
@@ -52,13 +88,13 @@ def sendImage(image):
                    'app_key': 'bb4b12aca6697ff8db9daebc9c7a2967'}   #TODO Change Keys
         # POST with JSON
         r = requests.post(url, data=json.dumps(payload), headers=headers)
-        print r.text
+        return r
 
 def sendResponseFromImage(imgFilePath):
     command = 'cd Script/ && ./darknet detect cfg/yolo.cfg yolo.weights ' + '../'+imgFilePath + ' > ../OutputDump/out.txt'
     print command
     # Uncomment to Get Working Copy TODO
-    # os.system(command)
+    os.system(command)
 
     f = open('OutputDump/out.txt', 'r')
     content = f.readlines()
