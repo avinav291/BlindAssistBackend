@@ -20,7 +20,7 @@ def uploadImage(request):
     filename = fs.save("media/" + myfile.name, myfile)
     with open(filename, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read())
-        payload = {"image": encoded_string, "gallery_name": "Gallery1", "subject_id": name} #TODO Change gallery name
+        payload = {"image": encoded_string, "gallery_name": "Gallery3", "subject_id": name} #TODO Change gallery name
         requests.post(url, data=json.dumps(payload), headers=headers)
     return HttpResponse(json.dumps({'statusCode': 200, 'message': 'Success'}))
 
@@ -50,7 +50,7 @@ def uploadImages(request):
             filename = fs.save("media/"+ myfile.name, myfile)
             with open(filename, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read())
-                payload = {"image": encoded_string, "gallery_name": "Gallery1", "subject_id": name}
+                payload = {"image": encoded_string, "gallery_name": "Gallery3", "subject_id": name}
                 action_item = grequests.post(url, data=json.dumps(payload), headers=headers)
                 async_list.append(action_item)
     # end = time.time()
@@ -76,9 +76,11 @@ def getImageCaption(request):
             # candidates = person_response_dict['images'][0]['candidates']
             transactions = person_response_dict['images']
             for transaction in transactions:
-                candidates = transaction['candidates']
-                for candidate in candidates:
-                    captionDict[candidate['subject_id']] = 100
+                if transaction.has_key('candidates'):
+                    candidates = transaction['candidates']
+                    for candidate in candidates:
+                        if candidate['confidence'] > 0.65:
+                            captionDict[candidate['subject_id']] = 100
             del captionDict['person']
     captions = []
     for key, value in captionDict.iteritems():
@@ -106,7 +108,7 @@ def sendImage(image):
         encoded_string = base64.b64encode(image_file.read())
         print 'sending File'
         url = 'https://api.kairos.com/recognize'
-        payload = {"image": encoded_string, "gallery_name": "Gallery1"} #TODO Change gallery name before demo
+        payload = {"image": encoded_string, "gallery_name": "Gallery3"} #TODO Change gallery name before demo
         headers = {'Content-Type': 'application/json', 'app_id': '9577a7cf',
                    'app_key': 'bb4b12aca6697ff8db9daebc9c7a2967'}   #TODO Change Keys
         # POST with JSON
