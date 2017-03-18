@@ -28,13 +28,18 @@ def uploadImage(request):
 def ping(request):
     return HttpResponse(json.dumps({'statusCode': 200, 'message': 'Success'}))
 
+
 @csrf_exempt
 def uploadImages(request):
     async_list = []
+
     name = request.POST.get('name')
+
     url = 'https://api.kairos.com/enroll'
     headers = {'Content-Type': 'application/json', 'app_id': '9577a7cf',
                'app_key': 'bb4b12aca6697ff8db9daebc9c7a2967'}  # TODO Change Keys
+
+
     # start = time.time()
     for i in range(1, 7):
         # print request
@@ -68,9 +73,12 @@ def getImageCaption(request):
         person_response_dict = json.loads(person_response.text)
         print person_response_dict
         if 'candidates' in person_response.text:
-            candidates = person_response_dict['images'][0]['candidates']
-            for candidate in candidates:
-                captionDict[candidate['subject_id']] = 100
+            # candidates = person_response_dict['images'][0]['candidates']
+            transactions = person_response_dict['images']
+            for transaction in transactions:
+                candidates = transaction['candidates']
+                for candidate in candidates:
+                    captionDict[candidate['subject_id']] = 100
             del captionDict['person']
     captions = []
     for key, value in captionDict.iteritems():
